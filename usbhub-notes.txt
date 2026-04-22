@@ -49,7 +49,6 @@ Paste this, replacing the `KERNELS` values with what you got above:
 ```
 SUBSYSTEM=="video4linux", KERNELS=="1-1.1", ATTR{index}=="0", SYMLINK+="cam-front"
 SUBSYSTEM=="video4linux", KERNELS=="1-1.2", ATTR{index}=="0", SYMLINK+="cam-gripper"
-SUBSYSTEM=="video4linux", KERNELS=="1-1.3", ATTR{index}=="0", SYMLINK+="cam-rear"
 ```
 
 The `ATTR{index}=="0"` part is what solves the "two video nodes per camera" problem — it matches only the real video node, not the metadata one.
@@ -74,7 +73,6 @@ You should see:
 ```
 lrwxrwxrwx 1 root root 6 ... /dev/cam-front -> video0
 lrwxrwxrwx 1 root root 6 ... /dev/cam-gripper -> video2
-lrwxrwxrwx 1 root root 6 ... /dev/cam-rear -> video4
 ```
 
 The numbers on the right can change across reboots — the symlinks on the left stay stable.
@@ -88,7 +86,6 @@ OpenCV's `VideoCapture` accepts a device path string, not just an integer index:
 ```python
 cam_front   = cv2.VideoCapture("/dev/cam-front",   cv2.CAP_V4L2)
 cam_gripper = cv2.VideoCapture("/dev/cam-gripper", cv2.CAP_V4L2)
-cam_rear    = cv2.VideoCapture("/dev/cam-rear",    cv2.CAP_V4L2)
 ```
 
 That's it. Now "front" always means the camera plugged into the front USB port, regardless of boot order, replug order, or anything else.
