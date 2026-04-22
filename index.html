@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/style.css">
+    <title>Kraken Rov Interface</title>
+    <nav>
+        <img src="static\media\kraken_logo.jpeg" alt="kraken logo" class="logo">
+        <h1>Kraken Rov Pilot Interface</h1>
+    </nav>
+</head>
+<body>
+    <div class="grid-container">
+        <div class="grid-item">
+            <iframe src="/front" scrolling="no"></iframe>
+            <div class="compartment-label">front camera</div>
+        </div>
+        <div class="grid-item">
+            <iframe src="/gripper" scrolling="no"></iframe>
+            <div class="compartment-label">gripper camera</div>
+        </div>
+        <div class="grid-item">
+            <iframe src="/gripper_detection" scrolling="no"></iframe>
+            <div class="compartment-label">Gripper ai detection camera</div>
+        </div>
+        <div class="grid-item">
+            <div class="compartment-label">Sensor Readings</div>
+        </div>
+    </div>
+</body>
+</html>
