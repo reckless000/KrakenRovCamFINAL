@@ -1,0 +1,97 @@
+Good — this is worth doing properly because if the Pi reboots underwater mid-mission and the cameras come up in a different order, your pilot sees "front" footage from the rear cam. Let's pin them.
+
+**The approach:** udev rules that match each physical USB port and create a stable symlink like `/dev/cam-front`, regardless of what `/dev/videoN` number Linux happens to assign.
+
+The trick for three identical C270s is that you *can't* distinguish them by model/serial (Logitech doesn't burn unique serials into the C270). So you match by **which physical USB port they're plugged into**. That means: once you rule this, the port that currently holds the front camera must always hold the front camera.
+
+---
+
+**Step 1: find the USB path for each camera**
+
+Plug all three in. Then on the Pi:
+
+```bash
+for dev in /dev/video0 /dev/video2 /dev/video4; do
+  echo "=== $dev ==="
+  udevadm info --query=path --name=$dev
+done
+```
+
+You'll get output like:
+
+```
+=== /dev/video0 ===
+/devices/platform/axi/1000120000.pcie/.../usb1/1-1/1-1.1/1-1.1:1.0/video4linux/video0
+=== /dev/video2 ===
+/devices/platform/axi/1000120000.pcie/.../usb1/1-1/1-1.2/1-1.2:1.0/video4linux/video2
+```
+
+The important bit is the `KERNELS` path — the segment like `1-1.1`, `1-1.2`, `1-1.3`. That's the physical USB port. Get the full info for each:
+
+```bash
+udevadm info --attribute-walk --name=/dev/video0 | grep -E "KERNELS|ATTRS\{idVendor\}|ATTRS\{idProduct\}" | head -20
+```
+
+Note down the `KERNELS=="1-1.1"` (or whatever) value for each of your three cameras. These are the physical port identifiers.
+
+---
+
+**Step 2: create the udev rule**
+
+```bash
+sudo nano /etc/udev/rules.d/99-rov-cams.rules
+```
+
+Paste this, replacing the `KERNELS` values with what you got above:
+
+```
+SUBSYSTEM=="video4linux", KERNELS=="1-1.1", ATTR{index}=="0", SYMLINK+="cam-front"
+SUBSYSTEM=="video4linux", KERNELS=="1-1.2", ATTR{index}=="0", SYMLINK+="cam-gripper"
+```
+
+The `ATTR{index}=="0"` part is what solves the "two video nodes per camera" problem — it matches only the real video node, not the metadata one.
+
+---
+
+**Step 3: reload rules and reconnect**
+
+```bash
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+
+Unplug and replug the cameras (or reboot). Then verify:
+
+```bash
+ls -l /dev/cam-*
+```
+
+You should see:
+
+```
+lrwxrwxrwx 1 root root 6 ... /dev/cam-front -> video0
+lrwxrwxrwx 1 root root 6 ... /dev/cam-gripper -> video2
+```
+
+The numbers on the right can change across reboots — the symlinks on the left stay stable.
+
+---
+
+**Step 4: update your Python code**
+
+OpenCV's `VideoCapture` accepts a device path string, not just an integer index:
+
+```python
+cam_front   = cv2.VideoCapture("/dev/cam-front",   cv2.CAP_V4L2)
+cam_gripper = cv2.VideoCapture("/dev/cam-gripper", cv2.CAP_V4L2)
+```
+
+That's it. Now "front" always means the camera plugged into the front USB port, regardless of boot order, replug order, or anything else.
+
+---
+
+**One caveat about USB hubs:** if you're going through a powered hub, the `KERNELS` path gets longer (something like `1-1.4.1`, `1-1.4.2`, `1-1.4.3`). That's fine, just use whatever `udevadm info` shows you. The rule doesn't care how deep the path is, as long as it matches.
+
+**Testing tip:** after setting up the rules, physically unplug a camera and plug it into a *different* port. Check `ls -l /dev/cam-*` again — the camera's symlink should be gone (because the rule matches the port, not the camera). That's the behavior you want. If you want the symlink to follow the camera across ports, you'd need serial number matching, which the C270 doesn't support.
+
+Want me to write a one-liner that auto-generates the udev rule from whatever's currently plugged in? That can save you the manual walking.
