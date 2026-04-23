@@ -1,0 +1,7 @@
+Package	Install Command
+ultralytics (YOLOv8)	pip install ultralytics
+OpenCV	pip install opencv-python-headless
+NumPy	pip install numpy
+PyTorch	pip install torch torchvision
+v4l-utils	sudo apt install v4l-utils
+ffmpeg	sudo apt install ffmpeg
