@@ -10,15 +10,16 @@ app = Flask(__name__)
 # LOAD YOUR TRAINED MODEL
 # Make sure best.pt is in the same folder as this script
 # ─────────────────────────────────────────────
-model = YOLO("best.pt")  # ← NEW
+model = YOLO("CrabDetectionModel.pt")  # ← NEW
 print("✅ Green crab model loaded!")
 
 # ─────────────────────────────────────────────
 # CAMERAS
 # Update indexes if needed (0, 1, 2)
 # ─────────────────────────────────────────────
-cam_front   = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-cam_gripper = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # ← fixed index to 1
+#put the paths for the cams at the usb hub after the tutorial from the readme
+cam_front   = cv2.VideoCapture("")
+cam_gripper = cv2.VideoCapture("")  # ← fixed index to 1
 
 def setup_cam(cam):
     cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
