@@ -176,14 +176,14 @@ cd YOUR_REPO
 Install Python dependencies:
 
 ```bash
-pip install -r requirements.txt
+cat requirements.txt
 ```
 
 Place your trained YOLOv8 model weights in the `models/` directory:
 
 ```
 models/
-└── crab_detect.pt
+└── CrabDetectionModel.pt
 ```
 
 ---
@@ -193,7 +193,7 @@ models/
 ### Run both camera feeds with crab detection
 
 ```bash
-python3 main.py
+python3 cams_final_withChange.py
 ```
 
 ### Run a single camera
@@ -218,7 +218,7 @@ python3 -c "import cv2; cap = cv2.VideoCapture('/dev/rov_cam_down'); print('OK' 
 ```bash
 python3 -c "
 from ultralytics import YOLO
-model = YOLO('models/crab_detect.pt')
+model = YOLO('models/CrabDetectionModel.pt')
 results = model('/dev/rov_cam_down', stream=True)
 for r in results:
     print(r.boxes)
