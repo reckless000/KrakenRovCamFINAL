@@ -10,7 +10,7 @@ app = Flask(__name__)
 # LOAD YOUR TRAINED MODEL
 # Make sure best.pt is in the same folder as this script
 # ─────────────────────────────────────────────
-model = YOLO("CrabDetectionModel.pt")  # ← NEW
+model = YOLO("CrabDetectionModelFINAL.pt")  # ← NEW
 print("✅ Green crab model loaded!")
 
 # ─────────────────────────────────────────────
